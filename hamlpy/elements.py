@@ -66,7 +66,7 @@ class Element(object):
             attributes_dict = eval(attribute_dict_string)
             for k, v in attributes_dict.items():
                 if k != 'id' and k != 'class':
-                    self.attributes += "%s='%s' " % (k, v)
+                    self.attributes += "%s=\"%s\" " % (k, v)
             self.attributes = self.attributes.strip()
         return attributes_dict
 
