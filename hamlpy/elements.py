@@ -4,7 +4,7 @@ import re
 class Element(object):
     """contains the pieces of an element and can populate itself from haml element text"""
     
-    self_closing_tags = ('meta', 'img', 'link', 'script', 'br', 'hr')
+    self_closing_tags = ('meta', 'img', 'link', 'br', 'hr')
 
     ELEMENT = '%'
     ID = '#'
