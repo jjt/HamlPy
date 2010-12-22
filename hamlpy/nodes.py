@@ -160,7 +160,7 @@ class VariableNode(ElementNode):
         return "%s%s" % (self.spaces, self._render_tag_content(tag_content))
 
 class TagNode(HamlNode):
-    self_closing = {'for':'endfor', 'if':'endif', 'block':'endblock'}
+    self_closing = {'for':'endfor', 'if':'endif', 'block':'endblock', 'comment':'endcomment'}
     
     def __init__(self, haml):
         HamlNode.__init__(self, haml)
