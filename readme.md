@@ -30,7 +30,7 @@ turns into..
 	</div>
 	
 
-The main difference is instead of interpretting Ruby, or even Python we instead can create Django Tags and Variables
+The main difference is instead of interpreting Ruby, or even Python we instead can create Django Tags and Variables
 
 	%ul#atheletes
 		- for athelete in athelete_list
@@ -50,7 +50,7 @@ Check out the [reference.md](http://github.com/jessemiller/HamlPy/blob/master/re
 
 ## Status
 
-HamlPy currently cannot:
+HamlPy currently:
 
-- Do variable interpolation.  So there is currently no way to go `%p This is some cool #{coolThing.text}`.
-
+- has no configuration file.  which it should for a few reasons, like turning off what is autoescaped for example
+- does not support some of the filters yet

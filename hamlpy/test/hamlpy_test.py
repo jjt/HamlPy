@@ -35,13 +35,13 @@ class HamlPyTest(unittest.TestCase):
         self.assertTrue("lang='en'" in result)
         self.assertTrue(result.endswith("></html>") or result.endswith("></html>\n"))
     
-    def testDictionariesSupportArraysForId(self):
+    def test_dictionaries_support_arrays_for_id(self):
         haml = "%div{'id':('itemType', '5')}"
         html = "<div id='itemType_5'></div>"
         hamlParser = hamlpy.Compiler()
         result = hamlParser.process(haml)
-        self.assertEqual(html, result.replace('\n', ''))
-        
+        self.assertEqual(html, result.replace('\n', ''))  
+          
     def test_html_comments_rendered_properly(self):
         haml = '/ some comment'
         html = "<!-- some comment -->"
@@ -72,7 +72,7 @@ class HamlPyTest(unittest.TestCase):
         
     def test_if_else_django_tags_render(self):
         haml = '- if something\n   %p hello\n- else\n   %p goodbye'
-        html = '{% if something %}\n   <p>hello</p>\n{% else %}\n   <p>goodbye</p>\n\n{% endif %}\n'
+        html = '{% if something %}\n   <p>hello</p>\n{% else %}\n   <p>goodbye</p>\n{% endif %}\n'
         hamlParser = hamlpy.Compiler()
         result = hamlParser.process(haml)
         eq_(html, result)
@@ -97,4 +97,33 @@ class HamlPyTest(unittest.TestCase):
         result = hamlParser.process(haml)
         eq_(html, result)
         
+    def test_inline_variables_are_parsed_correctly(self):
+        haml = "%h1 Hello, #{name}, how are you?"
+        html = "<h1>Hello, {{ name }}, how are you?</h1>\n"
+        hamlParser = hamlpy.Compiler()
+        result = hamlParser.process(haml)
+        eq_(html, result)
+
+    def test_inline_variables_with_special_characters_are_parsed_correctly(self):
+        haml = "%h1 Hello, #{person.name}, how are you?"
+        html = "<h1>Hello, {{ person.name }}, how are you?</h1>\n"
+        hamlParser = hamlpy.Compiler()
+        result = hamlParser.process(haml)
+        eq_(html, result)
         
+    def test_plain_text(self):
+        haml = "This should be plain text\n    This should be indented"
+        html = "This should be plain text\n    This should be indented\n"
+        hamlParser = hamlpy.Compiler()
+        result = hamlParser.process(haml)
+        eq_(html, result)   
+             
+    def test_plain_text_with_indenting(self):
+        haml = "This should be plain text"
+        html = "This should be plain text\n"
+        hamlParser = hamlpy.Compiler()
+        result = hamlParser.process(haml)
+        eq_(html, result)
+        
+if __name__ == '__main__':
+    unittest.main()

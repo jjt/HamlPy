@@ -1,12 +1,13 @@
 # haml-watcher.py
 # Author: Christian Stefanescu (st.chris@gmail.com)
-# 
-# Watch a folder for files with the given extensions and call the HamlPy 
+#
+# Watch a folder for files with the given extensions and call the HamlPy
 # compiler if the modified time has changed since the last check.
 
 import sys
 import codecs
 import os
+import os.path
 import time
 from hamlpy import Compiler
 
@@ -14,7 +15,7 @@ EXTENSIONS = ['.hamlpy']    # watched extensions
 CHECK_INTERVAL = 3          # in seconds
 DEBUG = False               # print file paths when a file is compiled
 
-# dict of compiled files [filename : timestamp]
+# dict of compiled files [fullpath : timestamp]
 compiled = dict()
 
 def watched_extension(extension):
@@ -29,32 +30,39 @@ def watch_folder():
     if len(sys.argv) == 2:
         folder = os.path.realpath(sys.argv[1])
         print "Watching %s at refresh interval %s seconds" % (folder,CHECK_INTERVAL)
-        _watch_folder(folder)
+        while True:
+            try:
+                _watch_folder(folder)
+                time.sleep(CHECK_INTERVAL)
+            except KeyboardInterrupt:
+                # allow graceful exit (no stacktrace output)
+                sys.exit(0)
+                pass
     else:
-        print "Usage: haml-watcher.py <watch_folder>" 
-        
+        print "Usage: haml-watcher.py <watch_folder>"
+
 def _watch_folder(folder):
     """Compares "modified" timestamps against the "compiled" dict, calls compiler
     if necessary."""
-    for filename in os.listdir(folder):
-        fullpath = os.path.join(folder, filename)
-        mtime = os.stat(fullpath).st_mtime
-        if watched_extension(filename):
-            if ((not compiled.has_key(filename)) or (compiled[filename] < mtime)):
-                compile_file(fullpath)               
-                compiled[filename] = mtime
-    while True:
-        try:
-            time.sleep(CHECK_INTERVAL)
-            _watch_folder(folder)
-        except KeyboardInterrupt:
-            # allow graceful exit (no stacktrace output)
-            sys.exit(0)
-            pass
-            
-def compile_file(fullpath):
+    for dirpath, dirnames, filenames in os.walk(folder):
+        filepaths = (os.path.join(dirpath, filename) \
+                     for filename in filenames \
+                     if watched_extension(filename)
+                    )
+        for fullpath in filepaths:
+            mtime = os.stat(fullpath).st_mtime
+            compiled_path = _compiled_path(fullpath)
+            if (not fullpath in compiled or
+                compiled[fullpath] < mtime or
+                not os.path.isfile(compiled_path)):
+                compile_file(fullpath, compiled_path)
+                compiled[fullpath] = mtime
+
+def _compiled_path(fullpath):
+    return fullpath[:fullpath.rfind('.')] + '.html'
+
+def compile_file(fullpath, outfile_name):
     """Calls HamlPy compiler."""
-    outfile_name = fullpath[:fullpath.rfind('.')] + '.html'
     if DEBUG:
         print "Compiling %s -> %s" % (fullpath, outfile_name)
     haml_lines = codecs.open(fullpath, 'r', encoding='utf-8').read().splitlines()
